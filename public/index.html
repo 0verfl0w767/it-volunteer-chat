@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Hỏi Đáp Cho Sinh Viên</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="student-body">
+    <main class="simple-shell">
+      <div id="joinScreen" class="join-screen">
+        <section class="join-card" aria-labelledby="joinTitle">
+          <header class="join-brand">
+            <h1>Web Programming</h1>
+          </header>
+          <div class="join-divider" aria-hidden="true"></div>
+          <p class="join-kicker">THAM GIA LỚP HỌC</p>
+          <h2 id="joinTitle">Xin chào!</h2>
+          <p class="join-description">
+            Nhập thông tin của bạn để bắt đầu đặt câu hỏi.
+          </p>
+          <form id="joinForm" class="join-form">
+            <label class="join-field" for="nameInput">
+              <span>Họ và tên</span>
+              <input
+                id="nameInput"
+                name="name"
+                type="text"
+                maxlength="20"
+                placeholder="Nhập tên của bạn"
+                autocomplete="name"
+                required
+              />
+            </label>
+            <label class="join-field" for="seatInput">
+              <span>Số ghế</span>
+              <input
+                id="seatInput"
+                name="seatNumber"
+                type="text"
+                maxlength="20"
+                placeholder="Ví dụ 12"
+                inputmode="numeric"
+                required
+              />
+            </label>
+            <button type="submit" class="primary-button join-button">
+              <span>Vào phòng chat</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </button>
+          </form>
+          <p class="join-note">Thông tin chỉ được dùng trong lớp học này.</p>
+        </section>
+        <p class="join-footer-credit">
+          Made by Volunteer IT Captain &amp; Web Programming Team
+        </p>
+      </div>
+
+      <section id="chatScreen" class="panel hidden">
+        <div
+          id="submissionNotice"
+          class="submission-notice hidden"
+          role="status"
+          aria-live="polite"
+        ></div>
+        <div class="chat-stage">
+          <div id="messageList" class="message-list" aria-live="polite"></div>
+          <div id="reactionLayer" class="reaction-layer" aria-hidden="true"></div>
+        </div>
+
+        <form id="messageForm" class="message-form">
+          <label class="sr-only" for="messageInput">Tin nhắn</label>
+          <textarea
+            id="messageInput"
+            maxlength="30000"
+            placeholder="Nhập tin nhắn"
+            rows="3"
+            required
+          ></textarea>
+          <div class="composer-footer">
+            <output id="messageCount" class="character-count" for="messageInput">
+              0 / 30,000
+            </output>
+            <div class="form-actions">
+              <button
+                type="button"
+                class="secondary-button reaction-button"
+                data-symbol="👍"
+                aria-label="Gửi lượt thích"
+              >
+                <b class="reaction-emoji" aria-hidden="true">👍</b>
+                <span>Thích</span>
+              </button>
+              <button
+                type="button"
+                class="secondary-button reaction-button ok-button"
+                data-symbol="👌"
+                aria-label="Gửi OK"
+              >
+                <b class="reaction-emoji" aria-hidden="true">👌</b>
+                <span>OK</span>
+              </button>
+              <button
+                type="button"
+                class="secondary-button reaction-button heart-button"
+                data-symbol="❤️"
+                aria-label="Gửi trái tim"
+              >
+                <b class="reaction-emoji" aria-hidden="true">❤️</b>
+                <span>Tim</span>
+              </button>
+              <button
+                id="openProjectModalButton"
+                type="button"
+                class="secondary-button project-button"
+                aria-label="Mở cửa sổ nộp bài"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 16V4m0 0 4 4m-4-4-4 4M5 18.5h14"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                </svg>
+                <span>Nộp bài</span>
+              </button>
+              <button type="submit" class="primary-button send-button">
+                <span>Gửi</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m4 4 17 8-17 8 2.2-6.5L15 12l-8.8-1.5L4 4Z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <div id="projectModal" class="submit-modal hidden" aria-hidden="true">
+      <div
+        class="submit-modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="projectModalTitle"
+      >
+        <div class="submit-modal-header">
+          <h2 id="projectModalTitle">Gửi bài tập của bạn</h2>
+          <button
+            id="projectModalClose"
+            type="button"
+            class="submit-modal-close"
+            aria-label="Đóng cửa sổ nộp bài"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6 18 18M18 6 6 18" />
+            </svg>
+          </button>
+        </div>
+
+        <p class="submit-modal-description">
+          Bạn có thể chọn nhiều tệp cùng lúc. Sau khi tải lên xong, hệ thống sẽ
+          tạo một đường dẫn riêng theo tên của bạn.
+        </p>
+
+        <div class="submit-modal-toolbar">
+          <input id="projectFileInput" type="file" multiple class="hidden" />
+          <button
+            id="projectChooseButton"
+            type="button"
+            class="secondary-button modal-action-button"
+          >
+            Chọn tệp
+          </button>
+          <button
+            id="projectUploadButton"
+            type="button"
+            class="primary-button modal-action-button"
+          >
+            Tải lên
+          </button>
+        </div>
+
+        <p class="submit-modal-limits">
+          Tối đa 20 tệp, mỗi tệp 15MB, tổng cộng 50MB.
+        </p>
+
+        <div class="submission-summary-row">
+          <p id="projectSelectedSummary" class="submission-summary">
+            Chưa chọn tệp nào.
+          </p>
+          <button
+            id="projectClearButton"
+            type="button"
+            class="submission-clear hidden"
+          >
+            Xóa hết
+          </button>
+        </div>
+
+        <div class="submission-progress hidden" id="projectProgress">
+          <div class="submission-progress-track">
+            <div
+              id="projectProgressBar"
+              class="submission-progress-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+          <p id="projectProgressText" class="submission-progress-text">
+            Đang chờ tệp...
+          </p>
+        </div>
+
+        <ul id="projectFileList" class="submission-file-list"></ul>
+
+        <div
+          id="projectStatus"
+          class="submission-status hidden"
+          role="status"
+          aria-live="polite"
+        ></div>
+      </div>
+    </div>
+
+    <div id="imageModal" class="image-modal hidden" aria-hidden="true">
+      <button
+        id="imageModalClose"
+        type="button"
+        class="image-modal-close"
+        aria-label="Đóng ảnh"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6 18 18M18 6 6 18" />
+        </svg>
+      </button>
+      <img id="imageModalImage" class="image-modal-media" alt="Ảnh phóng to" />
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/student.js"></script>
+    <script src="/student-projects.js"></script>
+  </body>
+</html>

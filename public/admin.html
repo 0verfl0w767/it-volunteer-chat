@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>관리자 페이지</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-body">
+    <main class="admin-shell">
+      <section class="panel admin-project-panel">
+        <div class="admin-project-header">
+          <div>
+            <h2>제출 목록</h2>
+            <p class="muted">이름을 누르면 제출 폴더를 바로 열 수 있습니다.</p>
+          </div>
+        </div>
+        <div id="adminProjectList" class="admin-project-list" aria-live="polite"></div>
+      </section>
+
+      <section class="panel admin-chat-panel">
+        <div class="chat-stage">
+          <div id="adminMessageList" class="message-list" aria-live="polite"></div>
+        </div>
+        <form id="adminMessageForm" class="message-form">
+          <div id="adminImagePreview" class="image-preview hidden">
+            <div class="image-preview-header">
+              <span>첨부 이미지</span>
+              <button
+                id="adminImageRemove"
+                type="button"
+                class="image-preview-remove"
+                aria-label="첨부 이미지 삭제"
+              >
+                삭제
+              </button>
+            </div>
+            <img
+              id="adminPreviewImage"
+              class="image-preview-media"
+              alt="첨부 이미지 미리보기"
+            />
+          </div>
+          <label class="sr-only" for="adminMessageInput">관리자 답변</label>
+          <textarea
+            id="adminMessageInput"
+            maxlength="30000"
+            placeholder="답변을 입력하거나 Ctrl + V로 이미지를 붙여넣으세요"
+            rows="3"
+          ></textarea>
+          <div class="composer-footer">
+            <output
+              id="adminMessageCount"
+              class="character-count"
+              for="adminMessageInput"
+            >
+              0 / 30,000
+            </output>
+            <div class="form-actions">
+              <button type="submit" class="primary-button send-button">
+                <span>전송</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m4 4 17 8-17 8 2.2-6.5L15 12l-8.8-1.5L4 4Z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <div id="imageModal" class="image-modal hidden" aria-hidden="true">
+      <button
+        id="imageModalClose"
+        type="button"
+        class="image-modal-close"
+        aria-label="이미지 닫기"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6 18 18M18 6 6 18" />
+        </svg>
+      </button>
+      <img id="imageModalImage" class="image-modal-media" alt="확대 이미지" />
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/admin.js"></script>
+  </body>
+</html>

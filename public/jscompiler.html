@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JS Compiler</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/editor/editor.main.css"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #e8edf5;
+        --panel: rgba(255, 255, 255, 0.98);
+        --surface: #f5f8fc;
+        --line: #d4ddeb;
+        --text: #182233;
+        --muted: #6a7485;
+        --accent: #1769e0;
+        --accent-dark: #0f56bd;
+        --console: #101722;
+        --console-line: #1a2636;
+        --console-text: #edf3fb;
+        --success: #1f8d57;
+        --error: #d6516b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "Aptos", "Noto Sans KR", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(23, 105, 224, 0.12), transparent 26%),
+          linear-gradient(180deg, #f7fafe 0%, var(--bg) 100%);
+      }
+
+      .shell {
+        width: min(1540px, calc(100% - 20px));
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 10px 0;
+      }
+
+      .app {
+        display: grid;
+        grid-template-rows: 1fr;
+        min-height: calc(100vh - 20px);
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid rgba(209, 218, 230, 0.9);
+        border-radius: 20px;
+        box-shadow: 0 18px 48px rgba(31, 43, 61, 0.09);
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(420px, 1.15fr) minmax(360px, 1fr);
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .editor-panel,
+      .preview-panel {
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .editor-panel {
+        padding: 12px;
+      }
+
+      .editor-surface {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+        background: #ffffff;
+      }
+
+      #editor {
+        width: 100%;
+        height: 100%;
+      }
+
+      .run-control {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        visibility: hidden;
+      }
+
+      .run-control.is-visible {
+        visibility: visible;
+      }
+
+      .editor-run-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        background: var(--accent);
+        border: 0;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 12px 28px rgba(23, 105, 224, 0.22);
+        transition:
+          transform 160ms ease,
+          background-color 160ms ease,
+          box-shadow 160ms ease,
+          opacity 160ms ease;
+      }
+
+      .editor-run-button:hover {
+        background: var(--accent-dark);
+        box-shadow: 0 14px 30px rgba(15, 86, 189, 0.24);
+      }
+
+      .editor-run-button:active {
+        transform: translateY(1px);
+      }
+
+      .editor-run-button:focus-visible {
+        outline: 0;
+        box-shadow:
+          0 0 0 4px rgba(23, 105, 224, 0.16),
+          0 14px 30px rgba(15, 86, 189, 0.24);
+      }
+
+      .editor-run-button:disabled {
+        cursor: default;
+        opacity: 0.92;
+      }
+
+      .editor-run-status {
+        min-width: 52px;
+        padding: 4px 8px;
+        color: #5f6f84;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.1;
+        text-align: center;
+        letter-spacing: 0.02em;
+        background: #eef3f8;
+        border: 1px solid #d5deea;
+        border-radius: 999px;
+        box-shadow: 0 6px 16px rgba(39, 56, 77, 0.08);
+        user-select: none;
+      }
+
+      .run-control[data-state="idle"] .editor-run-button {
+        background: var(--accent);
+      }
+
+      .run-control[data-state="idle"] .editor-run-status {
+        color: #5f6f84;
+        background: #eef3f8;
+        border-color: #d5deea;
+      }
+
+      .run-control[data-state="running"] .editor-run-button,
+      .run-control[data-state="loading"] .editor-run-button {
+        background: #f59e0b;
+        box-shadow: 0 12px 28px rgba(245, 158, 11, 0.26);
+      }
+
+      .run-control[data-state="running"] .editor-run-status,
+      .run-control[data-state="loading"] .editor-run-status {
+        color: #9a5a00;
+        background: #fff1cf;
+        border-color: #ffd98a;
+      }
+
+      .run-control[data-state="ready"] .editor-run-button {
+        background: var(--success);
+        box-shadow: 0 12px 28px rgba(31, 141, 87, 0.24);
+      }
+
+      .run-control[data-state="ready"] .editor-run-status {
+        color: #17643f;
+        background: #ddf6e8;
+        border-color: #b8e9cd;
+      }
+
+      .run-control[data-state="error"] .editor-run-button {
+        background: var(--error);
+        box-shadow: 0 12px 28px rgba(214, 81, 107, 0.24);
+      }
+
+      .run-control[data-state="error"] .editor-run-status {
+        color: #8d2e40;
+        background: #ffe0e6;
+        border-color: #f6b8c4;
+      }
+
+      .play-icon {
+        width: 0;
+        height: 0;
+        margin-left: 2px;
+        border-top: 7px solid transparent;
+        border-bottom: 7px solid transparent;
+        border-left: 11px solid #ffffff;
+      }
+
+      .box {
+        min-height: 0;
+        overflow: hidden;
+        padding: 12px;
+        height: 100%;
+      }
+
+      .console {
+        margin: 0;
+        height: 100%;
+        padding: 16px;
+        overflow: auto;
+        color: var(--console-text);
+        font: 13px/1.7 "Cascadia Code", "Consolas", monospace;
+        background: var(--console);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .console-line {
+        padding: 6px 0;
+        border-bottom: 1px solid var(--console-line);
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .console-line:last-child {
+        border-bottom: 0;
+      }
+
+      .console-line.is-info {
+        color: #dce5f2;
+      }
+
+      .console-line.is-warn {
+        color: #ffd88a;
+      }
+
+      .console-line.is-error {
+        color: #ff9cb0;
+      }
+
+      .console-line.is-result {
+        color: #98f2b9;
+      }
+
+      @media (max-width: 1100px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .shell {
+          width: min(100% - 16px, 1480px);
+          padding: 8px 0;
+        }
+
+        .app {
+          min-height: calc(100vh - 16px);
+        }
+
+        .editor-surface {
+          min-height: 360px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="app">
+        <section class="workspace">
+          <section class="panel editor-panel">
+            <div class="editor-surface">
+              <div id="editor"></div>
+              <div id="runControl" class="run-control" data-state="idle">
+                <button
+                  id="runButton"
+                  type="button"
+                  class="editor-run-button"
+                  aria-label="Run code"
+                  title="Run code"
+                >
+                  <span class="play-icon" aria-hidden="true"></span>
+                </button>
+                <div id="runStatus" class="editor-run-status">Idle</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel box">
+            <pre id="consoleOutput" class="console"></pre>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.min.js"></script>
+    <script src="/jscompiler.js"></script>
+  </body>
+</html>

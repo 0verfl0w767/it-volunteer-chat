@@ -1,0 +1,21 @@
+{
+  "name": "it-volunteer-chat",
+  "version": "1.0.0",
+  "description": "Chat hoi dap thoi gian thuc cho hoc sinh su dung Express va Socket.IO",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "express",
+    "socket.io",
+    "chat"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}

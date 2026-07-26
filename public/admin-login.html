@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>관리자 로그인</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-body">
+    <main class="simple-shell">
+      <div class="join-screen admin-login-screen">
+        <section class="join-card" aria-labelledby="adminLoginTitle">
+          <header class="join-brand">
+            <h1>관리자 페이지</h1>
+          </header>
+          <div class="join-divider" aria-hidden="true"></div>
+          <h2 id="adminLoginTitle">비밀번호 입력</h2>
+          <p class="join-description">
+            이 페이지는 관리자만 접근할 수 있습니다.
+          </p>
+          <form class="join-form" action="/admin/login" method="post">
+            <label class="join-field" for="adminPasswordInput">
+              <input
+                id="adminPasswordInput"
+                name="password"
+                type="password"
+                placeholder="비밀번호를 입력하세요"
+                autocomplete="current-password"
+                required
+              />
+            </label>
+            <p id="loginError" class="login-error hidden">비밀번호가 올바르지 않습니다.</p>
+            <button type="submit" class="primary-button join-button">
+              <span>로그인</span>
+            </button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const loginError = document.getElementById("loginError");
+      const adminPasswordInput = document.getElementById("adminPasswordInput");
+
+      if (params.get("error")) {
+        loginError.classList.remove("hidden");
+      }
+
+      adminPasswordInput.focus();
+    </script>
+  </body>
+</html>
